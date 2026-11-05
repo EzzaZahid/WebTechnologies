@@ -1,0 +1,276 @@
+﻿
+@model BookStore.ViewModels.HomeViewModel
+
+@section Styles {
+    <style>
+        body {
+            background-color: #f5f7fb;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 35px;
+        }
+
+            .hero-section h1 {
+                font-weight: 700;
+                font-size: 2.5rem;
+            }
+
+            .hero-section p {
+                color: #cbd5e1;
+                font-size: 1.1rem;
+            }
+
+        .section-title {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        .form-card {
+            background: white;
+            border: none;
+            border-radius: 14px;
+            padding: 25px;
+            height: 100%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+            .form-card h4 {
+                font-weight: 600;
+                margin-bottom: 20px;
+                color: #334155;
+            }
+
+        .form-control,
+        .form-select {
+            padding: 10px 12px;
+            border-radius: 8px;
+        }
+
+        .btn-custom {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .book-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 22px;
+            height: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+            .book-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            }
+
+            .book-card h5 {
+                font-weight: 700;
+                color: #1e293b;
+            }
+
+        .book-author {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .book-price {
+            color: #2563eb;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            background: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 14px;
+            color: #64748b;
+        }
+    </style>
+}
+
+<div class="hero-section">
+    <h1>Welcome to Book Store</h1>
+
+    <p>
+        Discover your next favorite book.
+        Explore our collection of books from talented authors.
+    </p>
+</div>
+
+<div class="row g-4 mb-5">
+
+    <div class="col-md-6">
+        <div class="form-card">
+
+            <h4>Add a New Book</h4>
+
+            <form method="post" action="/Home/AddBook">
+
+                <div class="mb-3">
+                    <label class="form-label">Book Title</label>
+
+                    <input type="text"
+                           name="title"
+                           class="form-control"
+                           placeholder="Enter book title"
+                           required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Price (Rs.)</label>
+
+                    <input type="number"
+                           name="price"
+                           class="form-control"
+                           placeholder="Enter book price"
+                           step="0.01"
+                           min="0"
+                           required />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Author</label>
+
+                    <select name="authorId"
+                            class="form-select"
+                            required>
+
+                        @foreach (var author in Model.Authors)
+                        {
+                            <option value="@author.Id">
+                                @author.Name
+                            </option>
+                        }
+
+                    </select>
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary btn-custom w-100">
+                    Add Book
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-card">
+
+            <h4>Add a New Author</h4>
+
+            <form method="post" action="/Home/AddAuthor">
+
+                <div class="mb-3">
+                    <label class="form-label">Author Name</label>
+
+                    <input type="text"
+                           name="name"
+                           class="form-control"
+                           placeholder="Enter author name"
+                           required />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Country</label>
+
+                    <input type="text"
+                           name="country"
+                           class="form-control"
+                           placeholder="Enter author's country"
+                           required />
+                </div>
+
+                <button type="submit"
+                        class="btn btn-success btn-custom w-100">
+                    Add Author
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h2 class="section-title">Our Book Collection</h2>
+
+    <span class="badge bg-primary rounded-pill">
+        @Model.Books.Count Books
+    </span>
+
+</div>
+
+@if (Model.Books.Count == 0)
+{
+    <div class="empty-state">
+        <h4>No books available</h4>
+
+        <p class="mb-0">
+            Add your first book using the form above.
+        </p>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+
+        @foreach (var book in Model.Books)
+        {
+            <div class="col-md-6 col-lg-4">
+
+                <div class="book-card">
+
+                    <h5>@book.Title</h5>
+
+                    <p class="book-author mb-2">
+                        By @book.AuthorName
+                    </p>
+
+                    <p class="book-price mb-3">
+                        Rs. @book.Price.ToString("N2")
+                    </p>
+
+                    <form method="post"
+                          action="/Home/RemoveBook"
+                          onsubmit="return confirmRemove()">
+
+                        <input type="hidden"
+                               name="id"
+                               value="@book.Id" />
+
+                        <button type="submit"
+                                class="btn btn-outline-danger btn-sm">
+                            Remove Book
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function confirmRemove() {
+            return confirm("Remove this book?");
+        }
+    </script>
+}
